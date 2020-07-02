@@ -46,16 +46,24 @@ class Provider
     private $output;
     /** @var Configuration */
     private $configuration;
+    /** @var PhpatClassLoader */
+    private $classLoader;
 
     /**
      * Provider constructor.
      * @param ContainerBuilder $builder
      * @param array            $config
+     * @param PhpatClassLoader $classLoader
      * @param OutputInterface  $output
      */
-    public function __construct(ContainerBuilder $builder, array $config, OutputInterface $output)
-    {
+    public function __construct(
+        ContainerBuilder $builder,
+        array $config,
+        PhpatClassLoader $classLoader,
+        OutputInterface $output
+    ) {
         $this->configuration = new Configuration($config);
+        $this->classLoader = $classLoader;
         $this->builder  = $builder;
         $this->output = $output;
     }
@@ -65,6 +73,7 @@ class Provider
      */
     public function register(): ContainerBuilder
     {
+        $this->builder->set(PhpatClassLoader::class, $this->classLoader);
         $this->builder->set(Configuration::class, $this->configuration);
         $this->builder->set(ComposerFileParser::class, new ComposerFileParser());
         $this->builder->set(Parser::class, (new ParserFactory())->create(ParserFactory::ONLY_PHP7));

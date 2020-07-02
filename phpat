@@ -4,6 +4,7 @@
 declare(strict_types=1);
 
 use PhpAT\App\Exception\FatalErrorException;
+use PhpAT\App\PhpatClassLoader;
 use PhpAT\App\Provider;
 use PhpAT\Input\ArgvInput;
 use PhpAT\Output\StdOutput;
@@ -14,7 +15,9 @@ try {
     $autoload = is_file(__DIR__.'/../../autoload.php')
         ? __DIR__.'/../../autoload.php'
         : __DIR__.'/vendor/autoload.php';
-    require $autoload;
+    $cl = require $autoload;
+
+    $loader = new PhpatClassLoader($cl, $autoload);
 
     $input = new ArgvInput($_SERVER['argv']);
     $file = $input->getArgument('config-file', 'phpat.yaml');
@@ -41,7 +44,7 @@ try {
 
     $container = new ContainerBuilder();
     $output = new StdOutput($verbosity, $isDryRun);
-    $provider  = new Provider($container, $config, $output);
+    $provider = new Provider($container, $config, $loader, $output);
     $container = $provider->register();
 
     $app = $container->get('app');
